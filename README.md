@@ -1,4 +1,4 @@
-# home-automation-mqtt-haas
+# home-automation-mqtt-hass
 Personal project with a broker mqtt (mosquitto), home assistant project (HASS), docker and a lot of esp8266
 
 # Using Docker

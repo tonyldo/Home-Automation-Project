@@ -19,4 +19,7 @@ $ chmod +x install.sh
 
 $ ./install.sh
 
-#Testing
+# Testing
+
+Go to https://github.com/tonyldo/home-assistant-device-simulator
+

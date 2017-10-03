@@ -20,10 +20,12 @@ echo "Integrating HASS and Mosquitto..."
 
 while [ ! -f $HOME/.homeassistant/config/configuration.yaml ]
 do
-  sleep 2
+  sleep 5
 done
 
 ls -l $HOME/.homeassistant/config/configuration.yaml
+
+echo " " >> $HOME/.homeassistant/config/configuration.yaml
 
 echo "mqtt:" >> $HOME/.homeassistant/config/configuration.yaml
 

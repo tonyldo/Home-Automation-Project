@@ -21,5 +21,8 @@ $ ./install.sh
 
 # Testing
 
-Go to https://github.com/tonyldo/home-assistant-device-simulator
+curl -X POST -H "Content-Type: application/json" -d '{"payload": "Teste", "topic": "hello/world", "retain": "True"}' http://localhost:8123/api/services/mqtt/publish
 
+mosquitto_sub -t "hello/world" -q 2
+
+Go to https://github.com/tonyldo/home-assistant-device-simulator for futher information how to test other Home Assistant features.

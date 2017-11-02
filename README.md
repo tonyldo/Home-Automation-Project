@@ -21,7 +21,7 @@ $ ./install.sh $MOSQUITTO_USER $MOSQUITTO_USER_PASS
 
 # Testing
 
-$ curl -X POST -H "Content-Type: application/json" -d '{"payload": "Teste", "topic": "hello/world", "retain": "True"}' http://localhost:8123/api/services/mqtt/publish
+$ curl -X POST -H "x-ha-access: $INTERFACE_PASS" -H "Content-Type: application/json" -d '{"payload": "Teste", "topic": "hello/world", "retain": "True"}' http://localhost:8123/api/services/mqtt/publish
 
 $ mosquitto_sub -u $MOSQUITTO_USER -P $MOSQUITTO_USER_PASS -t hello/world -q 2
 

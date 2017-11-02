@@ -17,7 +17,7 @@ $ cd /path/to/dir/home-automation-mqtt-hass
 
 $ chmod +x install.sh
 
-$ ./install.sh $MOSQUITTO_USER $MOSQUITTO_USER_PASS
+$ ./install.sh
 
 # Testing
 

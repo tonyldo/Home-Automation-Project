@@ -25,9 +25,8 @@ mkdir $HOME/.mosquitto/data/ $HOME/.mosquitto/config $HOME/.mosquitto/log $HOME/
 SCRIPT=$(readlink -f "$0")
 # Absolute path this script is in, thus /home/user/bin
 SCRIPTPATH=$(dirname "$SCRIPT")
-echo $SCRIPTPATH
 
-echo "Copy config file for mosquitto..."
+echo "Copy config file for mosquitto from template..."
 cp $SCRIPTPATH/config/mosquitto.conf $HOME/.mosquitto/config
 
 docker run -d --user $UID:$GROUPS --name="mosquitto" -p 1883:1883 -p 9001:9001 -v $HOME/.mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf -v $HOME/.mosquitto/data/:/mosquitto/data/ -v $HOME/.mosquitto/log/:/mosquitto/log/ -v $HOME/.mosquitto/pwd/:/mosquitto/pwd/ eclipse-mosquitto
@@ -63,6 +62,20 @@ docker exec mosquitto mosquitto_passwd -b "/mosquitto/pwd/pass.file" $username $
 echo "allow_anonymous false" >> $HOME/.mosquitto/config/mosquitto.conf
 echo "password_file /mosquitto/pwd/pass.file" >> $HOME/.mosquitto/config/mosquitto.conf
 
+echo "Integrating HASS and Mosquitto..."
+echo " " >> $HOME/.homeassistant/config/configuration.yaml
+
+echo "mqtt:" >> $HOME/.homeassistant/config/configuration.yaml
+
+echo " broker: 172.17.0.1" >> $HOME/.homeassistant/config/configuration.yaml
+echo " username: $username" >> $HOME/.homeassistant/config/configuration.yaml
+echo " password: $pwd1" >> $HOME/.homeassistant/config/configuration.yaml
+
+echo " discovery: true" >> $HOME/.homeassistant/config/configuration.yaml
+echo " discovery_prefix: homeassistant" >> $HOME/.homeassistant/config/configuration.yaml
+
+echo "Customizing HASS..."
+
 echo "Setup password for HASS web interface..."
 
 while :
@@ -79,22 +92,12 @@ done
 
 sed -i "/api_password:/a \  api_password: $pwd3" $HOME/.homeassistant/config/configuration.yaml
 
-echo "Integrating HASS and Mosquitto..."
-echo " " >> $HOME/.homeassistant/config/configuration.yaml
+echo "Customizing weather sensor..."
 
-echo "mqtt:" >> $HOME/.homeassistant/config/configuration.yaml
-
-echo " broker: 172.17.0.1" >> $HOME/.homeassistant/config/configuration.yaml
-echo " username: $username" >> $HOME/.homeassistant/config/configuration.yaml
-echo " password: $pwd1" >> $HOME/.homeassistant/config/configuration.yaml
-
-echo " discovery: true" >> $HOME/.homeassistant/config/configuration.yaml
-echo " discovery_prefix: homeassistant" >> $HOME/.homeassistant/config/configuration.yaml
-
-echo "Customizing HASS..."
 echo "sensor.yr_symbol:" >> $HOME/.homeassistant/config/customize.yaml 
 echo "  friendly_name: Weather" >> $HOME/.homeassistant/config/customize.yaml
 
+echo "Restart Hass and Mosquitto."
 docker restart home-assistant mosquitto
 
 echo "Finish."

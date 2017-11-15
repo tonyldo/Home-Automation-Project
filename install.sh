@@ -10,7 +10,7 @@ docker network prune -f
 docker volume prune -f
 
 while true; do
-    read -p "Do you wish update home-assistant and mosquitto?" yn
+    read -p "Do you wish update home-assistant and mosquitto images?" yn
     case $yn in
         [Yy]* ) docker image prune -a -f; break;;
         [Nn]* ) break;;
@@ -29,9 +29,9 @@ SCRIPTPATH=$(dirname "$SCRIPT")
 echo "Copy config file for mosquitto from template..."
 cp $SCRIPTPATH/config/mosquitto.conf $HOME/.mosquitto/config
 
-docker run -d --user $UID:$GROUPS --name="mosquitto" -p 1883:1883 -p 9001:9001 -v $HOME/.mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf -v $HOME/.mosquitto/data/:/mosquitto/data/ -v $HOME/.mosquitto/log/:/mosquitto/log/ -v $HOME/.mosquitto/pwd/:/mosquitto/pwd/ eclipse-mosquitto
+docker run -d --user $UID:$GROUPS --name="mosquitto" --restart unless-stopped -p 1883:1883 -p 9001:9001 -v $HOME/.mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf -v $HOME/.mosquitto/data/:/mosquitto/data/ -v $HOME/.mosquitto/log/:/mosquitto/log/ -v $HOME/.mosquitto/pwd/:/mosquitto/pwd/ eclipse-mosquitto
 
-docker run -d --user $UID:$GROUPS --name="home-assistant" -p 8123:8123 -v $HOME/.homeassistant/config/:/config -v /etc/localtime/:/etc/localtime:ro homeassistant/home-assistant
+docker run -d --user $UID:$GROUPS --name="home-assistant" --restart unless-stopped -p 8123:8123 -v $HOME/.homeassistant/config/:/config -v /etc/localtime/:/etc/localtime:ro homeassistant/home-assistant
 
 echo "Create HASS config..."
 
@@ -61,6 +61,22 @@ docker exec mosquitto touch "/mosquitto/pwd/pass.file"
 docker exec mosquitto mosquitto_passwd -b "/mosquitto/pwd/pass.file" $username $pwd1
 echo "allow_anonymous false" >> $HOME/.mosquitto/config/mosquitto.conf
 echo "password_file /mosquitto/pwd/pass.file" >> $HOME/.mosquitto/config/mosquitto.conf
+
+echo " "
+echo "connection cloudmqtt" >> $HOME/.mosquitto/config/mosquitto.conf
+echo "address m14.cloudmqtt.com:27769" >> $HOME/.mosquitto/config/mosquitto.conf
+echo "topic # in" >> $HOME/.mosquitto/config/mosquitto.conf
+echo "start_type automatic" >> $HOME/.mosquitto/config/mosquitto.conf
+echo "remote_username albjxxal" >> $HOME/.mosquitto/config/mosquitto.conf
+echo "remote_password nCNxNNZNlsWP" >> $HOME/.mosquitto/config/mosquitto.conf
+echo "remote_clientid albjxxal" >> $HOME/.mosquitto/config/mosquitto.conf
+echo "local_clientid albjxxal" >> $HOME/.mosquitto/config/mosquitto.conf
+echo "keepalive_interval 300" >> $HOME/.mosquitto/config/mosquitto.conf
+echo "cleansession true" >> $HOME/.mosquitto/config/mosquitto.conf
+echo "bridge_protocol_version mqttv311" >> $HOME/.mosquitto/config/mosquitto.conf
+echo "bridge_cafile /etc/ssl/certs/ca-certificates.crt" >> $HOME/.mosquitto/config/mosquitto.conf
+echo "bridge_insecure false" >> $HOME/.mosquitto/config/mosquitto.conf
+
 
 echo "Integrating HASS and Mosquitto..."
 echo " " >> $HOME/.homeassistant/config/configuration.yaml
@@ -98,7 +114,7 @@ echo "sensor.yr_symbol:" >> $HOME/.homeassistant/config/customize.yaml
 echo "  friendly_name: Weather" >> $HOME/.homeassistant/config/customize.yaml
 
 echo "Restart Hass and Mosquitto."
-docker restart home-assistant mosquitto
+docker start home-assistant mosquitto
 
 echo "Finish."
 

@@ -19,18 +19,59 @@ while true; do
 done
 
 echo "Create directories..."
-rm $HOME/.mosquitto/data/ $HOME/.mosquitto/config $HOME/.mosquitto/log $HOME/.homeassistant/config $HOME/.mosquitto/pwd -r
-mkdir $HOME/.mosquitto/data/ $HOME/.mosquitto/config $HOME/.mosquitto/log $HOME/.homeassistant/config $HOME/.mosquitto/pwd
+rm $HOME/.mosquitto/data/ $HOME/.mosquitto/config $HOME/.mosquitto/log $HOME/.homeassistant/config $HOME/.mosquitto/pwd $HOME/.mosquitto/bridge -r
+mkdir $HOME/.mosquitto/data/ $HOME/.mosquitto/config $HOME/.mosquitto/log $HOME/.homeassistant/config $HOME/.mosquitto/pwd $HOME/.mosquitto/bridge
 
 SCRIPT=$(readlink -f "$0")
 # Absolute path this script is in, thus /home/user/bin
 SCRIPTPATH=$(dirname "$SCRIPT")
 
-echo "Copy config file for mosquitto from template..."
-cp $SCRIPTPATH/config/mosquitto.conf $HOME/.mosquitto/config
+echo "Create config file for mosquitto..."
+echo "persistence true"  >> $HOME/.mosquitto/config/mosquitto.conf
+echo "persistence_location /mosquitto/data/" >> $HOME/.mosquitto/config/mosquitto.conf
+echo "log_dest file /mosquitto/log/mosquitto.log" >> $HOME/.mosquitto/config/mosquitto.conf
 
-docker run -d --user $UID:$GROUPS --name="mosquitto" --restart unless-stopped -p 1883:1883 -p 9001:9001 -v $HOME/.mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf -v $HOME/.mosquitto/data/:/mosquitto/data/ -v $HOME/.mosquitto/log/:/mosquitto/log/ -v $HOME/.mosquitto/pwd/:/mosquitto/pwd/ eclipse-mosquitto
+if [ -f $SCRIPTPATH/config/bridge.conf ]
+   then
+     cp $SCRIPTPATH/config/bridge.conf $HOME/.mosquitto/bridge/
+     echo " " >> $HOME/.mosquitto/config/mosquitto.conf
+     echo "include_dir /mosquitto/bridge/" >> $HOME/.mosquitto/config/mosquitto.conf
+   else
+     echo "config/bridge.conf not exist!"
+fi
 
+echo "Install Mosquitto mqtt broker..."
+docker run -d --user $UID:$GROUPS --name="mosquitto" --restart unless-stopped -p 1883:1883 -p 9001:9001 -v $HOME/.mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf -v $HOME/.mosquitto/data/:/mosquitto/data/ -v $HOME/.mosquitto/log/:/mosquitto/log/ -v $HOME/.mosquitto/pwd/:/mosquitto/pwd/ -v /etc/ssl/certs/:/etc/ssl/certs/ -v $HOME/.mosquitto/bridge:/mosquitto/bridge/ eclipse-mosquitto
+
+while [ ! $(docker inspect -f '{{.State.Running}}' mosquitto) = "true" ] 
+do 
+  echo "Wainting for mosquitto..."
+done
+
+read -p "Enter Username for mosquitto broker: " username
+while :
+do
+    read -sp "Enter Password for mosquitto broker: " pwd1
+    read -sp "Confirm Password: " pwd2
+    if [ "$pwd1" == "$pwd2" ]
+    then
+                break
+    else
+            echo "Password and Confirm password doesn't match...."
+    fi
+done
+
+echo " "
+echo "Create mosquitto security file..."
+docker exec mosquitto touch "/mosquitto/pwd/pass.file"
+docker exec mosquitto mosquitto_passwd -b "/mosquitto/pwd/pass.file" $username $pwd1
+
+echo " " >> $HOME/.mosquitto/config/mosquitto.conf
+echo "allow_anonymous false" >> $HOME/.mosquitto/config/mosquitto.conf
+echo "password_file /mosquitto/pwd/pass.file" >> $HOME/.mosquitto/config/mosquitto.conf
+
+
+echo "Install HASS..."
 docker run -d --user $UID:$GROUPS --name="home-assistant" --restart unless-stopped -p 8123:8123 -v $HOME/.homeassistant/config/:/config -v /etc/localtime/:/etc/localtime:ro homeassistant/home-assistant
 
 echo "Create HASS config..."
@@ -42,55 +83,6 @@ done
 
 echo "HASS configuration file created..."
 ls -l $HOME/.homeassistant/config/configuration.yaml
-
-read -p "Enter Username for mosquitto broker: " username
-while :
-do
-    read -sp "Enter Password for mosquitto broker: " pwd1
-    read -sp "Confirm Password: " pwd2
-    if [ "$pwd1" == "$pwd2" ]
-    then
-		break
-    else
-	    echo "Password and Confirm password doesn't match...."
-    fi
-done
-
-echo "Create mosquitto security file..."
-docker exec mosquitto touch "/mosquitto/pwd/pass.file"
-docker exec mosquitto mosquitto_passwd -b "/mosquitto/pwd/pass.file" $username $pwd1
-echo "allow_anonymous false" >> $HOME/.mosquitto/config/mosquitto.conf
-echo "password_file /mosquitto/pwd/pass.file" >> $HOME/.mosquitto/config/mosquitto.conf
-
-echo " "
-echo "connection cloudmqtt" >> $HOME/.mosquitto/config/mosquitto.conf
-echo "address m14.cloudmqtt.com:27769" >> $HOME/.mosquitto/config/mosquitto.conf
-echo "topic # in" >> $HOME/.mosquitto/config/mosquitto.conf
-echo "start_type automatic" >> $HOME/.mosquitto/config/mosquitto.conf
-echo "remote_username albjxxal" >> $HOME/.mosquitto/config/mosquitto.conf
-echo "remote_password nCNxNNZNlsWP" >> $HOME/.mosquitto/config/mosquitto.conf
-echo "remote_clientid albjxxal" >> $HOME/.mosquitto/config/mosquitto.conf
-echo "local_clientid albjxxal" >> $HOME/.mosquitto/config/mosquitto.conf
-echo "keepalive_interval 300" >> $HOME/.mosquitto/config/mosquitto.conf
-echo "cleansession true" >> $HOME/.mosquitto/config/mosquitto.conf
-echo "bridge_protocol_version mqttv311" >> $HOME/.mosquitto/config/mosquitto.conf
-echo "bridge_cafile /etc/ssl/certs/ca-certificates.crt" >> $HOME/.mosquitto/config/mosquitto.conf
-echo "bridge_insecure false" >> $HOME/.mosquitto/config/mosquitto.conf
-
-
-echo "Integrating HASS and Mosquitto..."
-echo " " >> $HOME/.homeassistant/config/configuration.yaml
-
-echo "mqtt:" >> $HOME/.homeassistant/config/configuration.yaml
-
-echo " broker: 172.17.0.1" >> $HOME/.homeassistant/config/configuration.yaml
-echo " username: $username" >> $HOME/.homeassistant/config/configuration.yaml
-echo " password: $pwd1" >> $HOME/.homeassistant/config/configuration.yaml
-
-echo " discovery: true" >> $HOME/.homeassistant/config/configuration.yaml
-echo " discovery_prefix: homeassistant" >> $HOME/.homeassistant/config/configuration.yaml
-
-echo "Customizing HASS..."
 
 echo "Setup password for HASS web interface..."
 
@@ -106,15 +98,68 @@ do
     fi
 done
 
-sed -i "/api_password:/a \  api_password: $pwd3" $HOME/.homeassistant/config/configuration.yaml
+sed -i "/api_password:/a \  api_password: !secret http_password" $HOME/.homeassistant/config/configuration.yaml
 
-echo "Customizing weather sensor..."
+echo "Integrating HASS and Mosquitto..."
+echo " " >> $HOME/.homeassistant/config/configuration.yaml
+
+echo "mqtt:" >> $HOME/.homeassistant/config/configuration.yaml
+
+echo " broker: 172.17.0.1" >> $HOME/.homeassistant/config/configuration.yaml
+echo " username: !secret mqtt_username" >> $HOME/.homeassistant/config/configuration.yaml
+echo " password: !secret mqtt_password" >> $HOME/.homeassistant/config/configuration.yaml
+echo " discovery: true" >> $HOME/.homeassistant/config/configuration.yaml
+echo " discovery_prefix: homeassistant" >> $HOME/.homeassistant/config/configuration.yaml
+
+echo "Create secrect file"
+rm $HOME/.homeassistant/config/secrets.yaml
+touch $HOME/.homeassistant/config/secrets.yaml
+echo "http_password: $pwd3" >> $HOME/.homeassistant/config/secrets.yaml
+echo "mqtt_username: $username" >> $HOME/.homeassistant/config/secrets.yaml
+echo "mqtt_password: $pwd1" >> $HOME/.homeassistant/config/secrets.yaml
+
+echo "Configure HASS..."
+
+echo "Configure device track..."
+
+if [ -f $SCRIPTPATH/config/device_tracker.yaml ]
+   then
+     cp $SCRIPTPATH/config/device_tracker.yaml $HOME/.homeassistant/config/
+     echo " " >> $HOME/.homeassistant/config/configuration.yaml
+     echo "device_tracker: !include device_tracker.yaml" >> $HOME/.homeassistant/config/configuration.yaml
+   else
+     echo "config/device_tracker.yaml not exist!"
+fi
+
+echo "Configure Zones..."
+
+if [ -f $SCRIPTPATH/config/zones.yaml ]
+   then
+     cp $SCRIPTPATH/config/zones.yaml $HOME/.homeassistant/config/
+     echo " " >> $HOME/.homeassistant/config/configuration.yaml
+     echo "zone: !include zones.yaml" >> $HOME/.homeassistant/config/configuration.yaml
+   else
+     echo "config/zones.yaml not exist!"
+fi
+
+
+echo "Configure Cameras..."
+
+if [ -f $SCRIPTPATH/config/zones.yaml ]
+   then
+     cp $SCRIPTPATH/config/cameras.yaml $HOME/.homeassistant/config/
+      echo " " >> $HOME/.homeassistant/config/configuration.yaml
+      echo "camera: !include cameras.yaml" >> $HOME/.homeassistant/config/configuration.yaml
+   else
+     echo "config/cameras.yaml not exist!"
+fi
+
+echo "Customizing HASS..."
 
 echo "sensor.yr_symbol:" >> $HOME/.homeassistant/config/customize.yaml 
 echo "  friendly_name: Weather" >> $HOME/.homeassistant/config/customize.yaml
 
 echo "Restart Hass and Mosquitto."
-docker start home-assistant mosquitto
+docker restart home-assistant mosquitto
 
 echo "Finish."
-

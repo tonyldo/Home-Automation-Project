@@ -1,0 +1,12 @@
+- platform: ffmpeg
+  name: cam1
+  input: rtsp://user:pass@cameraIP1/cam/realmonitor?channel=1&subtype=0
+- platform: ffmpeg
+  name: cam2
+  input: rtsp://user:pass@cameraIP2/cam/realmonitor?channel=2&subtype=0
+- platform: ffmpeg
+  name: cam3
+  input: rtsp://user:pass@cameraIP3/cam/realmonitor?channel=3&subtype=0
+- platform: ffmpeg
+  name: cam4
+  input: rtsp://user:pass@cameraIP4/cam/realmonitor?channel=4&subtype=0

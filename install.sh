@@ -145,7 +145,7 @@ fi
 
 echo "Configure Cameras..."
 
-if [ -f $SCRIPTPATH/config/zones.yaml ]
+if [ -f $SCRIPTPATH/config/cameras.yaml ]
    then
      cp $SCRIPTPATH/config/cameras.yaml $HOME/.homeassistant/config/
       echo " " >> $HOME/.homeassistant/config/configuration.yaml

@@ -1,0 +1,6 @@
+DEVICE_ID:
+  name: FriendlyName
+  mac:
+  picture: https://my.picture.com
+  track: yes
+  hide_if_away: no

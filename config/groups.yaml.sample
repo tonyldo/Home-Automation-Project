@@ -1,0 +1,28 @@
+Cameras:
+  name: Cameras
+  view: yes
+  entities:
+    - group.camera1
+    - group.camera2
+    - group.camera3
+    - group.camera4
+
+camera1:
+  name: Camera1
+  entities:
+    - camera.cam1
+
+camera2:
+  name: Camera2
+  entities:
+    - camera.cam2
+
+camera3:
+  name: Camera3
+  entities:
+    - camera.cam3
+
+camera4:
+  name: Camera4
+  entities:
+    - camera.cam4

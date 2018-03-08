@@ -100,6 +100,8 @@ done
 
 sed -i "/api_password:/a \  api_password: !secret http_password" $HOME/.homeassistant/config/configuration.yaml
 
+sed -i '/introduction:/d' $HOME/.homeassistant/config/configuration.yaml
+
 echo "Integrating HASS and Mosquitto..."
 echo " " >> $HOME/.homeassistant/config/configuration.yaml
 
@@ -120,44 +122,16 @@ echo "mqtt_password: $pwd1" >> $HOME/.homeassistant/config/secrets.yaml
 
 echo "Configure HASS..."
 
-echo "Configure device track..."
+find $SCRIPTPATH/config/ -name *.yaml -exec cp {} $HOME/.homeassistant/config/ \;
 
-if [ -f $SCRIPTPATH/config/device_tracker.yaml ]
-   then
-     cp $SCRIPTPATH/config/device_tracker.yaml $HOME/.homeassistant/config/
-     echo " " >> $HOME/.homeassistant/config/configuration.yaml
-     echo "device_tracker: !include device_tracker.yaml" >> $HOME/.homeassistant/config/configuration.yaml
-   else
-     echo "config/device_tracker.yaml not exist!"
-fi
+echo " " >> $HOME/.homeassistant/config/configuration.yaml
+echo "device_tracker: !include device_tracker.yaml" >> $HOME/.homeassistant/config/configuration.yaml
 
-echo "Configure Zones..."
+echo " " >> $HOME/.homeassistant/config/configuration.yaml
+echo "zone: !include zones.yaml" >> $HOME/.homeassistant/config/configuration.yaml
 
-if [ -f $SCRIPTPATH/config/zones.yaml ]
-   then
-     cp $SCRIPTPATH/config/zones.yaml $HOME/.homeassistant/config/
-     echo " " >> $HOME/.homeassistant/config/configuration.yaml
-     echo "zone: !include zones.yaml" >> $HOME/.homeassistant/config/configuration.yaml
-   else
-     echo "config/zones.yaml not exist!"
-fi
-
-
-echo "Configure Cameras..."
-
-if [ -f $SCRIPTPATH/config/cameras.yaml ]
-   then
-     cp $SCRIPTPATH/config/cameras.yaml $HOME/.homeassistant/config/
-      echo " " >> $HOME/.homeassistant/config/configuration.yaml
-      echo "camera: !include cameras.yaml" >> $HOME/.homeassistant/config/configuration.yaml
-   else
-     echo "config/cameras.yaml not exist!"
-fi
-
-echo "Customizing HASS..."
-
-echo "sensor.yr_symbol:" >> $HOME/.homeassistant/config/customize.yaml 
-echo "  friendly_name: Weather" >> $HOME/.homeassistant/config/customize.yaml
+echo " " >> $HOME/.homeassistant/config/configuration.yaml
+echo "camera: !include cameras.yaml" >> $HOME/.homeassistant/config/configuration.yaml
 
 echo "Restart Hass and Mosquitto."
 docker restart home-assistant mosquitto

@@ -5,3 +5,5 @@
 !*.sh
 !LICENSE
 !config/*.sample
+!.env
+!docker-compose.yml

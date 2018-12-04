@@ -1,14 +1,12 @@
-
   version: '3'
 
   services:
     mosquitto:
-      build: .
+      image: eclipse-mosquitto
       environment:
         - MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}
         - MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}
       container_name: mosquitto
-      image: eclipse-mosquitto
       ports:
         - 1883:1883
         - 9001:9001
@@ -18,3 +16,5 @@
         - ~/.mosquitto/log/:/mosquitto/log/
         - ~/.mosquitto/pwd/:/mosquitto/pwd/
       restart: unless-stopped
+      entrypoint: docker-entrypoint.sh
+      command: ["/usr/sbin/mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]

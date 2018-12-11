@@ -1,20 +1,12 @@
   version: '3'
-
   services:
-    mosquitto:
-      image: eclipse-mosquitto
-      environment:
-        - MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}
-        - MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}
-      container_name: mosquitto
-      ports:
-        - 1883:1883
-        - 9001:9001
+    homeassistant:
+      container_name: home-assistant
+      image: homeassistant/home-assistant
       volumes:
-        - ~/.mosquitto/config/:/mosquitto/config/
-        - ~/.mosquitto/data/:/mosquitto/data/
-        - ~/.mosquitto/log/:/mosquitto/log/
-        - ~/.mosquitto/pwd/:/mosquitto/pwd/
-      restart: unless-stopped
-      entrypoint: docker-entrypoint.sh
-      command: ["/usr/sbin/mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]
+        - /etc/localtime:/etc/localtime:ro
+        - ./homeassistant-entrypoint.sh:/docker-entrypoint.sh
+        - ./homeassistant-entrypoint.py:/usr/src/app/homeassistant-entrypoint.py
+      restart: always
+      command: ["sh", "/docker-entrypoint.sh"]
+      network_mode: host

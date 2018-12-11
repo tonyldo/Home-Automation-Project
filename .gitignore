@@ -7,3 +7,4 @@
 !config/*.sample
 !.env
 !docker-compose.yml
+!*.py

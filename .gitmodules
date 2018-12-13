@@ -1,0 +1,3 @@
+[submodule "MosquittoDockerComposeInstall"]
+	path = MosquittoDockerComposeInstall
+	url = https://github.com/tonyldo/MosquittoDockerComposeInstall.git

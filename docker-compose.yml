@@ -4,9 +4,10 @@
       container_name: home-assistant
       image: homeassistant/home-assistant
       volumes:
+        - ~/.homeassistant/config:/config
         - /etc/localtime:/etc/localtime:ro
         - ./homeassistant-entrypoint.sh:/docker-entrypoint.sh
         - ./homeassistant-entrypoint.py:/usr/src/app/homeassistant-entrypoint.py
-      restart: always
+      restart: unless-stopped
       command: ["sh", "/docker-entrypoint.sh"]
       network_mode: host

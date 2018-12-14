@@ -1,0 +1,13 @@
+  version: '3'
+  services:
+    appdaemon:
+      container_name: AcockburnAppdaemon
+      image: acockburn/appdaemon:latest
+      environment:
+        - HA_URL="http://localhost:8123"
+        - TOKEN="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJlYzlhMmE3YWYxYzI0OTVkYTcyMmMwYzhkZjAzOGYxNCIsImlhdCI6MTU0NDgwNjM3NiwiZXhwIjoxODYwMTY2Mzc2fQ.0Fxhiukt-18RyEGhVPYUj0t0jyzOOZXp4CeFKtXhKOU"
+        - DASH_URL="http://localhost:5050"
+      restart: unless-stopped
+      network_mode: host
+      depends_on:
+        - homeassistant

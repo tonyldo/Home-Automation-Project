@@ -1,23 +1,25 @@
 # home-automation-mqtt-hass
-Personal project with a broker mqtt (mosquitto), home assistant project (HASS), docker and a lot of esp8266
+Personal project with a broker mqtt (mosquitto), home assistant project (HASS) with docker...
 
-# Configuring the server (Ubuntu 16.10+) 
+# Install Docker.
 
-$ sudo apt-get install git docker mosquitto-clients
+See: https://docs.docker.com/install/
 
-$ sudo groupadd docker
+# Install Docker-Compose. # Only HomeAssistant....
 
-$ sudo usermod -aG docker $USER
+See: https://docs.docker.com/compose/install/ docker-compose -f docker-compose.yml
 
-# Cloning this respository and execute the install script.
+# Clone this repository
 
-$ git clone https://github.com/tonyldo/home-automation-mqtt-hass.git
+git clone --recursive https://github.com/tonyldo/home-automation-mqtt-hass.git
 
-$ cd /path/to/dir/home-automation-mqtt-hass
+# HomeAssitant w/ Mosquitto Broker integration...
 
-$ chmod +x install.sh
+docker-compose -f docker-compose.yml -f docker-compose-w-mqtt.yml -f MosquittoDockerComposeInstall/docker-compose.yaml
 
-$ ./install.sh
+# HomeAssitant w/ Mosquitto Broker integration and Bridge to another external MQTT Broker like cloudmqtt.com...
+
+docker-compose -f docker-compose.yml -f docker-compose-w-mqtt.yml -f MosquittoDockerComposeInstall/docker-compose.yaml -f MosquittoDockerComposeInstall/docker-compose-bridgemqtt.yaml
 
 # Testing
 

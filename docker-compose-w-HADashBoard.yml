@@ -5,9 +5,14 @@
       image: acockburn/appdaemon:latest
       environment:
         - HA_URL="http://localhost:8123"
-        - TOKEN="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJlYzlhMmE3YWYxYzI0OTVkYTcyMmMwYzhkZjAzOGYxNCIsImlhdCI6MTU0NDgwNjM3NiwiZXhwIjoxODYwMTY2Mzc2fQ.0Fxhiukt-18RyEGhVPYUj0t0jyzOOZXp4CeFKtXhKOU"
+        - TOKEN=""
         - DASH_URL="http://localhost:5050"
+      volumes:
+        - ~/.appDaemon/conf:/conf
+        - ./dockerWaitParameter.sh:/dockerWaitParameter.sh
+        - ./wait-for-it/wait-for-it.sh:/wait-for-it.sh
       restart: unless-stopped
       network_mode: host
-      depends_on:
-        - homeassistant
+      stdin_open: true
+      tty: true
+      entrypoint: ["/wait-for-it.sh", "localhost:8123", "--" , "sh" ,"/dockerWaitParameter.sh"]

@@ -7,7 +7,6 @@
         - ~/.homeassistant/config:/config
         - /etc/localtime:/etc/localtime:ro
         - ./homeassistant-entrypoint.sh:/docker-entrypoint.sh
-        - ./homeassistant-entrypoint.py:/usr/src/app/homeassistant-entrypoint.py
       restart: unless-stopped
       command: ["sh", "/docker-entrypoint.sh"]
       network_mode: host

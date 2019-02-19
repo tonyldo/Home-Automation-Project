@@ -1,5 +1,3 @@
-*/*
-*.*
 !.gitignore
 !README.md
 !*.sh
@@ -7,4 +5,4 @@
 !config/*.sample
 !.env
 !docker-compose*.yml
-!*.py
+!src/*/*.py

@@ -174,10 +174,8 @@ class CPTECControlData:
         # Update all devices
         tasks = []
         for dev in self.devices:
-            if dev.station_id is None:
-               dev.station_id = self.data.station_id
-            if dev.last_updated is None:
-               dev.last_updated = self.data.get_reading('last_time_updated')  
+            dev.station_id = self.data.station_id
+            dev.last_updated = self.data.get_reading('last_time_updated')  
             new_state = self.data.get_reading(dev.type)
             if new_state != dev._state:
                if dev.type == 'weather':

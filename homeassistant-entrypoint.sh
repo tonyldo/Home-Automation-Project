@@ -24,7 +24,7 @@ if [ ! -f /config/configuration.yaml ]; then
    echo " " >> /config/configuration.yaml
    echo "telegram_bot:" >> /config/configuration.yaml 
    echo "  - platform: polling" >> /config/configuration.yaml
-   echo "    api_key: 771704016:AAF3a2s_ZnrgXN7b4jTJH3ioIguRT8rTfsQ" >> /config/configuration.yaml
+   echo "    api_key: !secrets telegram_api_key" >> /config/configuration.yaml
    echo "    allowed_chat_ids:" >> /config/configuration.yaml
    echo "      - -341894634" >> /config/configuration.yaml
    echo " " >> /config/configuration.yaml

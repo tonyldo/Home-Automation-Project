@@ -7,7 +7,7 @@ if ( [ -z "${FRESHINSTALL}" ] ); then
    echo "Not deleting previous configuration..."
 else
    echo "Deleting previous configuration..."
-   rm -rf /config/* 
+   find /config -mindepth 1 -depth -exec rm -rf {} ';'
 fi
 
 if [ ! -f /config/configuration.yaml ]; then
@@ -45,8 +45,14 @@ if [ ! -f /config/configuration.yaml ]; then
    echo "      data:" >> /config/automations.yaml
    echo "        title: 'Está chovendo'" >> /config/automations.yaml
    echo "        message: 'Verifique as janelas.'" >> /config/automations.yaml
+
+   echo "automations:" >> /config/groups.yaml
+   echo "  view: yes" >> /config/groups.yaml
+   echo "  name: automation" >> /config/groups.yaml
+   echo "  entities:" >> /config/groups.yaml
+   echo "    - group.all_automations" >> /config/groups.yaml
+
 fi
 
 python -m homeassistant --config /config
-exec "$@"
-
+exec "$@

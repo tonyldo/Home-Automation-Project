@@ -7,8 +7,6 @@
         - ~/.homeassistant/config:/config
         - /etc/localtime:/etc/localtime:ro
         - ./homeassistant-entrypoint.sh:/docker-entrypoint.sh
-        - ./src/sensor/cptec.py:/usr/src/app/homeassistant/components/sensor/cptec.py
-        - ~/Documents/Git/BrazilianForecastIO/brazilianforecastio/current.py:/usr/src/app/homeassistant/components/sensor/current.py
       restart: unless-stopped
       command: ["sh", "/docker-entrypoint.sh"]
       network_mode: host

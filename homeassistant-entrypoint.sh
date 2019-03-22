@@ -33,6 +33,7 @@ else
              echo "${f%.yaml}:" "!include" "${i##*/}"  >> /config/configuration.yaml
           fi
       done
+      
       if ( [ -f /RecoveryConfigFiles/secrets.yaml ] ); then
          cp /RecoveryConfigFiles/secrets.yaml /config
       fi
@@ -43,7 +44,7 @@ else
    elif ( [ -f /config/mqtt.yaml ] ); then
       echo "Editing homeassistant mqtt integration, setting secrets..."
       sed -i 's/mosquitto_user/'"$MOSQUITTO_USERNAME"'/g' /config/secrets.yaml
-      sed -i 's/mosquitto_pass/'"${MOSQUITTO_PASSWORD}"'/g' /config/secrets.yaml
+      sed -i 's/mosquitto_pass/'"$MOSQUITTO_PASSWORD"'/g' /config/secrets.yaml
    else
       echo "Editing homeassistant mqtt integration..."
       echo " "  >> /config/configuration.yaml

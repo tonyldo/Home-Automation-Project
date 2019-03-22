@@ -8,9 +8,7 @@ if ( [ -z "${FRESHINSTALL}" ] ); then
 else
    echo "Deleting previous configuration..."
    find /config -mindepth 1 -depth -exec rm -rf {} ';'
-fi
 
-if [ ! -f /config/configuration.yaml ]; then
    echo "Creating new configurations files..."      
    cp /usr/src/app/homeassistant/scripts/ensure_config.py /usr/src/app/
 
@@ -19,39 +17,41 @@ if [ ! -f /config/configuration.yaml ]; then
 
    python /usr/src/app/ensure_config.py --config /config --script ensure_config
 
-   echo " " >> /config/configuration.yaml
+   if ( [ -z "${RECOVERYCONFIGFILES}" ] ); then
+      echo "Not previous configuration..."
+   else
+      echo "Recovery backup config files..."
+      for i in $(find /RecoveryConfigFiles -name '*.yaml' ! -name 'secrets.yaml'); do 
+          echo "Find backuped Configuration file:" "$i"
+          cp "$i" /config
+          f=${i##*/}
+          echo "$f"
+          if grep -q ${i##*/} /config/configuration.yaml; then
+             echo "${i##*/}" "already on configuration file..."
+          else
+             echo " "  >> /config/configuration.yaml
+             echo "${f%.yaml}:" "!include" "${i##*/}"  >> /config/configuration.yaml
+          fi
+      done
+      if ( [ -f /RecoveryConfigFiles/secrets.yaml ] ); then
+         cp /RecoveryConfigFiles/secrets.yaml /config
+      fi
+   fi
 
-   echo " " >> /config/configuration.yaml
-   echo "telegram_bot:" >> /config/configuration.yaml 
-   echo "  - platform: polling" >> /config/configuration.yaml
-   echo "    api_key: !secrets telegram_api_key" >> /config/configuration.yaml
-   echo "    allowed_chat_ids:" >> /config/configuration.yaml
-   echo "      - -341894634" >> /config/configuration.yaml
-   echo " " >> /config/configuration.yaml
-   echo "notify:" >> /config/configuration.yaml
-   echo "  - name: jarvis" >> /config/configuration.yaml
-   echo "    platform: telegram" >> /config/configuration.yaml
-   echo "    chat_id: -341894634" >> /config/configuration.yaml
-
-   sed '1d' /config/automations.yaml > /config/automations.tmp; mv /config/automations.tmp /config/automations.yaml
-   echo " "  >> /config/automations.yaml
-   echo "  - alias: 'Rainy Day'" >> /config/automations.yaml 
-   echo "    trigger:" >> /config/automations.yaml
-   echo "      - platform: state" >> /config/automations.yaml
-   echo "        entity_id: sensor.weather" >> /config/automations.yaml
-   echo "        to: 'c'" >> /config/automations.yaml
-   echo "    action:" >> /config/automations.yaml
-   echo "      service: notify.jarvis" >> /config/automations.yaml
-   echo "      data:" >> /config/automations.yaml
-   echo "        title: 'Está chovendo'" >> /config/automations.yaml
-   echo "        message: 'Verifique as janelas.'" >> /config/automations.yaml
-
-   echo "automations:" >> /config/groups.yaml
-   echo "  view: yes" >> /config/groups.yaml
-   echo "  name: automation" >> /config/groups.yaml
-   echo "  entities:" >> /config/groups.yaml
-   echo "    - group.all_automations" >> /config/groups.yaml
-
+   if ( [ -z "${MQTTINSTALL}" ] ); then
+      echo "No mqtt instalation..."
+   elif ( [ -f /config/mqtt.yaml ] ); then
+      echo "Editing homeassistant mqtt integration, setting secrets..."
+      sed -i 's/mosquitto_user/'"$MOSQUITTO_USERNAME"'/g' /config/secrets.yaml
+      sed -i 's/mosquitto_pass/'"${MOSQUITTO_PASSWORD}"'/g' /config/secrets.yaml
+   else
+      echo "Editing homeassistant mqtt integration..."
+      echo " "  >> /config/configuration.yaml
+      echo "mqtt: "  >> /config/configuration.yaml
+      echo "  broker: localhost"  >> /config/configuration.yaml
+      echo "  username: $MOSQUITTO_USERNAME"  >> /config/configuration.yaml
+      echo "  password: $MOSQUITTO_PASSWORD"  >> /config/configuration.yaml
+   fi
 fi
 
 python -m homeassistant --config /config

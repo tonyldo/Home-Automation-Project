@@ -1,0 +1,8 @@
+  version: '3'
+  services:
+    homeassistant:
+      environment:
+        RECOVERYCONFIGFILES: 'true'
+      volumes:
+        - ${RECOVERY_CONFIGFILES_DIR}:/RecoveryConfigFiles
+

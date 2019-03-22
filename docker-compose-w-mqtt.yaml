@@ -1,6 +1,11 @@
   version: '3'
   services:
     homeassistant:
+      env_file:
+        - $MOSQUITTO_INSTALL_WORK_DIR/mqtt.env
+        - $MOSQUITTO_INSTALL_WORK_DIR/mqtt_bridge.env
+      environment:
+        MQTTINSTALL: 'true'
       volumes:
         - ./wait-for-it/wait-for-it.sh:/wait-for-it.sh
       depends_on:

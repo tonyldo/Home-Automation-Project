@@ -21,7 +21,7 @@ else
       echo "Not previous configuration..."
    else
       echo "Recovery backup config files..."
-      for i in $(find /RecoveryConfigFiles -name '*.yaml' ! -name 'secrets.yaml'); do 
+      for i in $(find /RecoveryConfigFiles -name '*.yaml' ! -name 'secrets.yaml' ! -name 'known_devices.yaml'); do 
           echo "Find backuped Configuration file:" "$i"
           cp "$i" /config
           f=${i##*/}
@@ -37,6 +37,17 @@ else
       if ( [ -f /RecoveryConfigFiles/secrets.yaml ] ); then
          cp /RecoveryConfigFiles/secrets.yaml /config
       fi
+      
+      if ( [ -f /RecoveryConfigFiles/known_devices.yaml ] ); then
+         cp /RecoveryConfigFiles/known_devices.yaml /config
+      fi
+      
+      mkdir /www
+      for i in $(find /RecoveryConfigFiles -name '*.jpg' ); do 
+          echo "Find image files:" "$i"
+          cp "$i" /www
+      done
+
    fi
 
    if ( [ -z "${MQTTINSTALL}" ] ); then

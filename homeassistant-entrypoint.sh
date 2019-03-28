@@ -42,10 +42,10 @@ else
          cp /RecoveryConfigFiles/known_devices.yaml /config
       fi
       
-      mkdir /www
+      mkdir /config/www
       for i in $(find /RecoveryConfigFiles -name '*.jpg' ); do 
           echo "Find image files:" "$i"
-          cp "$i" /www
+          cp "$i" /config/www
       done
 
    fi

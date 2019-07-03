@@ -3,9 +3,10 @@ set -e
 
 echo "Starting Home Assistant configuration..."
 
-if ( [ -z "${FRESHINSTALL}" ] ); then
-   echo "Not deleting previous configuration..."
-else
+CONTAINER_ALREADY_STARTED="CONTAINER_ALREADY_STARTED_PLACEHOLDER"
+if [ ! -e $CONTAINER_ALREADY_STARTED ]; then
+   touch $CONTAINER_ALREADY_STARTED
+   echo "-- First container startup --"
    echo "Deleting previous configuration..."
    find /config -mindepth 1 -depth -exec rm -rf {} ';'
 
@@ -64,6 +65,8 @@ else
       echo "  username: $MOSQUITTO_USERNAME"  >> /config/configuration.yaml
       echo "  password: $MOSQUITTO_PASSWORD"  >> /config/configuration.yaml
    fi
+else
+   echo "-- Not first container startup --"
 fi
 
 python -m homeassistant --config /config

@@ -25,18 +25,12 @@ $docker-compose -f docker-compose.yaml -f docker-compose-w-mqtt.yaml -f Mosquitt
 ```
 $docker-compose -f docker-compose.yaml -f docker-compose-w-mqtt.yaml -f MosquittoDockerComposeInstall/docker-compose.yaml -f MosquittoDockerComposeInstall/docker-compose-bridgemqtt.yaml  up --build
 ```
-## 7 - Or homeAssitant w/ Mosquitto Broker integration, Bridge to another external MQTT Broker and restoring backuped file from pre defined folder...
+## 7 - ... Or restoring backuped file from pre defined folder, add this option:
 > You need now edit the the option RECOVERY_CONFIGFILES_DIR=/Path-to/Home-Assistant-Configuration-Files-Dir/ on .env file
 ```
-$docker-compose -f docker-compose.yaml -f docker-compose-w-mqtt.yaml -f MosquittoDockerComposeInstall/docker-compose.yaml -f MosquittoDockerComposeInstall/docker-compose-bridgemqtt.yaml -f docker-compose-recovery-configfiles.yaml up --build
+$ -f docker-compose-recovery-configfiles.yaml
 ```
-## 8 - If you need a fresh install:
-> add this "-f docker-compose-fresh-install.yaml" to any above options, TO DELETE ALL CONFIGURATION files before install process.
-```
--f docker-compose-fresh-install.yaml
-```
-## 9 - Testing
+## 8 - Testing, subscribe to mosquitto broker with the following command, go to home assistant web interface http://docker_machine_ip:8123 and post something on MQTT Publish service. 
 ```
 $ mosquitto_sub -u $MOSQUITTO_USER -P $MOSQUITTO_USER_PASS -t +/# -v
 ```
-

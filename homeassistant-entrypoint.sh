@@ -22,7 +22,7 @@ if [ ! -e $CONTAINER_ALREADY_STARTED ]; then
       echo "Not previous configuration..."
    else
       echo "Recovery backup config files..."
-      for i in $(find /RecoveryConfigFiles -name '*.yaml' ! -name 'secrets.yaml' ! -name 'known_devices.yaml'); do 
+      for i in $(find /RecoveryConfigFiles -name '*.yaml' ! -name 'secrets.yaml' ! -name 'customize.yaml'); do 
           echo "Find backuped Configuration file:" "$i"
           cp "$i" /config
           f=${i##*/}
@@ -38,9 +38,11 @@ if [ ! -e $CONTAINER_ALREADY_STARTED ]; then
       if ( [ -f /RecoveryConfigFiles/secrets.yaml ] ); then
          cp /RecoveryConfigFiles/secrets.yaml /config
       fi
-      
-      if ( [ -f /RecoveryConfigFiles/known_devices.yaml ] ); then
-         cp /RecoveryConfigFiles/known_devices.yaml /config
+
+      if ( [ -f /RecoveryConfigFiles/customize.yaml ] ); then
+         echo "homeassistant:"  >> /config/configuration.yaml
+         echo "  customize: !include customize.yaml"  >> /config/configuration.yaml
+         cp /RecoveryConfigFiles/customize.yaml /config
       fi
       
       mkdir /config/www

@@ -1,0 +1,8 @@
+  version: '3'
+  services:
+    homeassistant:
+      volumes:
+        - /etc/letsencrypt/live/:/etc/letsencrypt/live/
+        - /etc/letsencrypt/archive/:/etc/letsencrypt/archive/
+
+

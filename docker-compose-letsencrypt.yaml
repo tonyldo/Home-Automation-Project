@@ -4,5 +4,3 @@
       volumes:
         - /etc/letsencrypt/live/:/etc/letsencrypt/live/
         - /etc/letsencrypt/archive/:/etc/letsencrypt/archive/
-
-
